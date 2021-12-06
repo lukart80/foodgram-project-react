@@ -33,7 +33,6 @@ class UserManager(BaseUserManager):
             email, username, password, first_name='Admin', last_name='Admin', is_superuser=True, is_staff=True)
 
 
-
 class User(AbstractUser):
     """Кастомная модель пользователя."""
     email = models.EmailField(
@@ -66,4 +65,6 @@ class User(AbstractUser):
         null=False,
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
     objects = UserManager()
