@@ -10,6 +10,6 @@ class Command(BaseCommand):
         for ingredient in data:
             Ingredient.objects.create(
                 name=ingredient['name'],
-                measure_units=ingredient['measurement_unit']
+                measurement_unit=ingredient['measurement_unit']
                 )
             print('saved!')
