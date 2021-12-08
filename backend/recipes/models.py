@@ -28,7 +28,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     """Модель для рецептов."""
 
-    tags = models.ManyToManyField(Tag, blank=False, null=False, verbose_name='Теги', related_name='recipes')
+    tags = models.ManyToManyField(Tag, verbose_name='Теги', related_name='recipes')
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
