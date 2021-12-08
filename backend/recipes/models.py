@@ -17,3 +17,6 @@ class Tag(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название', blank=False, null=False)
     color = models.CharField(max_length=7, verbose_name='Код цвета')
     slug = models.SlugField(max_length=200)
+
+    class Meta:
+        ordering = ('name',)
