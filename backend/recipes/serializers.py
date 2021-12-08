@@ -23,6 +23,7 @@ class RecipeSerializer(ModelSerializer):
     """Сериализотор для рецептов."""
     image = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
+    ingredients = IngredientSerializer(many=True)
 
     class Meta:
         model = Recipe
