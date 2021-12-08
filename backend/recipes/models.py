@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Ingredient(models.Model):
@@ -20,3 +23,36 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+
+class Recipe(models.Model):
+    """Модель для рецептов."""
+
+    tags = models.ManyToManyField(Tag, blank=False, null=False, verbose_name='Теги', related_name='recipes')
+    author = models.ForeignKey(
+        User,
+        verbose_name='Автор',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='recipes')
+    name = models.CharField(max_length=200, verbose_name='Название', blank=False, null=False)
+    image = models.ImageField(upload_to='recipes/', blank=False, null=False)
+    text = models.CharField(max_length=3000, verbose_name='Описание', blank=False, null=False)
+    cooking_time = models.PositiveIntegerField(verbose_name='Время пригототовления', blank=False, null=False)
+    ingredients = models.ManyToManyField(Ingredient, through='IngredientAmount', related_name='recipes', )
+
+
+class IngredientAmount(models.Model):
+    """Промежуточная модель для хранения количесва ингредиентов."""
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               verbose_name='рецепт',
+                               blank=False, null=False,
+                               related_name='recipe_amount')
+    ingredient = models.ForeignKey(Ingredient,
+                                   on_delete=models.SET_NULL,
+                                   null=True,
+                                   related_name='recipe_amount'
+                                   )
+    amount = models.PositiveIntegerField(blank=False, null=False)
