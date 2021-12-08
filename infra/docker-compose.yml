@@ -2,6 +2,7 @@ version: '3.3'
 
 volumes:
   media_value:
+  static_value:
 
 services:
 
@@ -21,6 +22,7 @@ services:
       - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
       - media_value:/var/html/media/
+      - static_value:/var/html/static/
     depends_on:
       - backend
 
@@ -30,3 +32,4 @@ services:
       dockerfile: Dockerfile
     volumes:
       - media_value:/code/media/
+      - static_value:/code/static/
