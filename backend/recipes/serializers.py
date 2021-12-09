@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from .models import Ingredient, Tag, Recipe
+from users.serializers import UserSerializer
 
 
 class IngredientSerializer(ModelSerializer):
@@ -24,6 +25,7 @@ class RecipeSerializer(ModelSerializer):
     image = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
     ingredients = IngredientSerializer(many=True)
+    author = UserSerializer()
 
     class Meta:
         model = Recipe
