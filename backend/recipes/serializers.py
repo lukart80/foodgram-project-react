@@ -100,7 +100,7 @@ class RecipeWriteSerializer(ModelSerializer):
         ingredients = self.validated_data.get('ingredients')
         instance.tags.clear()
         for tag_id in tags:
-            instance.tags.add(Tag, pk=tag_id)
+            instance.tags.add(get_object_or_404(Tag, pk=tag_id))
         IngredientAmount.objects.filter(recipe=instance).delete()
         for ingredient in ingredients:
             ingredient_instance = get_object_or_404(Ingredient, pk=ingredient.get('id'))
