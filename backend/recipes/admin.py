@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ingredient, Tag, Recipe, IngredientAmount
+from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite
 
 
 @admin.register(Ingredient)
@@ -23,3 +23,9 @@ class RecipeAdmin(admin.ModelAdmin):
     """Админка для рецептов."""
     list_display = ('name', 'text')
     inlines = [IngredientAmountInline]
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    """Админка для избранного."""
+    list_display = ('recipe', 'author')

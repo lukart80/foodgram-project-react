@@ -56,3 +56,22 @@ class IngredientAmount(models.Model):
                                    related_name='recipe_amount'
                                    )
     amount = models.PositiveIntegerField(blank=False, null=False)
+
+
+class Favorite(models.Model):
+    """Модель для избранных рецептов пользователя."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=True,
+        verbose_name='Пользователь',
+        related_name='favorites'
+    )
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               null=True,
+                               blank=True,
+                               verbose_name='Рецепт',
+                               related_name='favorites',
+                               )
