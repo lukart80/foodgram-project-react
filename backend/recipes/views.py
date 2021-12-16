@@ -1,6 +1,10 @@
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.decorators import action
 from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite
-from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer
+from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, FavoriteSerializer
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import RecipePagination
 
@@ -40,3 +44,26 @@ class RecipeViewSet(ModelViewSet):
 
             return queryset.filter(author=author, pk__in=favorite_recipes_ids)
         return queryset
+
+    @action(detail=True, methods=['GET'])
+    def favorite(self, request, pk):
+
+        author = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        payload = {
+            'author': author.id,
+            'recipe': recipe.id
+        }
+        serializer = FavoriteSerializer(data=payload)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk):
+        author = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        favorite = get_object_or_404(Favorite, author=author, recipe=recipe)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

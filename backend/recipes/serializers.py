@@ -127,3 +127,11 @@ class RecipeWriteSerializer(ModelSerializer):
         instance.save()
 
         return instance
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для добавления избранных рецептов."""
+
+    class Meta:
+        model = Favorite
+        fields = ('author', 'recipe')
