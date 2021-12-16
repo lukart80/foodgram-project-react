@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import constraints
 
 User = get_user_model()
 
@@ -66,6 +67,11 @@ class IngredientAmount(models.Model):
                                    )
     amount = models.PositiveIntegerField(blank=False, null=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'ingredient'], name='unique_ingredient_recipe')
+        ]
+
 
 class Favorite(models.Model):
     """Модель для избранных рецептов пользователя."""
@@ -84,6 +90,11 @@ class Favorite(models.Model):
                                verbose_name='Рецепт',
                                related_name='favorites',
                                )
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['author', 'recipe'], name='unique_favorite')
+        ]
 
 
 class Cart(models.Model):
@@ -103,3 +114,8 @@ class Cart(models.Model):
                                verbose_name='Рецепт',
                                related_name='cart',
                                )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['author', 'recipe'], name='unique_cart'),
+        ]
