@@ -3,9 +3,11 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
-from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
+from rest_framework.generics import ListAPIView
+from users.models import User
+from .models import Ingredient, Tag, Recipe, Favorite, Cart
 from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, \
-    FavoriteSerializer, CartSerializer
+    FavoriteSerializer, CartSerializer, FollowingReadSerializer
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import RecipePagination
 
@@ -93,3 +95,13 @@ class RecipeViewSet(ModelViewSet):
         cart = get_object_or_404(Cart, author=author, recipe=recipe)
         cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SubscriptionsListView(ListAPIView):
+    serializer_class = FollowingReadSerializer
+    pagination_class = RecipePagination
+
+    def get_queryset(self):
+        user = self.request.user
+        user_following_ids = user.follower.all().values('following')
+        return User.objects.filter(pk__in=user_following_ids)

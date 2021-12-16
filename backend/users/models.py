@@ -68,3 +68,22 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
     objects = UserManager()
+
+
+class Follower(models.Model):
+    follower = models.ForeignKey(
+        User,
+        related_name='follower',
+        on_delete=models.CASCADE,
+        verbose_name='Подписчик',
+        blank=False,
+        null=False,
+    )
+    following = models.ForeignKey(
+        User,
+        related_name='following',
+        verbose_name='Подписан',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )

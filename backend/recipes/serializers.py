@@ -6,6 +6,7 @@ from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
 from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
 from users.serializers import UserSerializer
+from users.models import User, Follower
 
 
 class IngredientSerializer(ModelSerializer):
@@ -149,3 +150,36 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ('author', 'recipe')
+
+
+class FollowerRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения рецепта в подписках."""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class FollowingReadSerializer(serializers.ModelSerializer):
+    """Сериализатор для вывода авторов, на которых подписан пользователь."""
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'first_name', 'last_name', 'email', 'username', 'recipes', 'is_subscribed', 'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        return Follower.objects.filter(follower=self.context['request'].user, following=obj).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes = obj.recipes.all()
+        if request.GET.get('recipes_limit'):
+            recipes = recipes[:int(request.GET.get('recipes_limit'))]
+        serializer = FollowerRecipeSerializer(recipes, many=True)
+        return serializer.data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.all().count()
