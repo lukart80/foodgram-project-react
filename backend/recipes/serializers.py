@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
-from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite
+from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
 from users.serializers import UserSerializer
 
 
@@ -51,10 +51,12 @@ class RecipeReadSerializer(ModelSerializer):
     ingredients = serializers.SerializerMethodField()
     author = UserSerializer()
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'author', 'name', 'image', 'text', 'id', 'ingredients', 'cooking_time', 'is_favorited')
+        fields = ('tags', 'author', 'name', 'image', 'text', 'id', 'ingredients', 'cooking_time', 'is_favorited',
+                  'is_in_shopping_cart')
         read_only_fields = ['tags', 'author', 'name', 'image', 'text', 'id', 'ingredients', 'cooking_time']
 
     def get_image(self, obj):
@@ -67,9 +69,13 @@ class RecipeReadSerializer(ModelSerializer):
         author = self.context.get('request').user
         if not author.is_authenticated:
             return False
-        if Favorite.objects.filter(author=author, recipe=obj):
-            return True
-        return False
+        return Favorite.objects.filter(author=author, recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        author = self.context.get('request').user
+        if not author.is_authenticated:
+            return False
+        return Cart.objects.filter(author=author, recipe=obj).exists()
 
 
 class IngredientAmountWriteSerializer(serializers.Serializer):
@@ -134,4 +140,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
+        fields = ('author', 'recipe')
+
+
+class CartSerializer(serializers.ModelSerializer):
+    """Сериализатор для корзины."""
+
+    class Meta:
+        model = Cart
         fields = ('author', 'recipe')

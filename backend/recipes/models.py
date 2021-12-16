@@ -13,6 +13,9 @@ class Ingredient(models.Model):
     class Meta:
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name[:20]
+
 
 class Tag(models.Model):
     """Модель для тегов."""
@@ -23,6 +26,9 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:20]
 
 
 class Recipe(models.Model):
@@ -41,6 +47,9 @@ class Recipe(models.Model):
     text = models.CharField(max_length=3000, verbose_name='Описание', blank=False, null=False)
     cooking_time = models.PositiveIntegerField(verbose_name='Время пригототовления', blank=False, null=False)
     ingredients = models.ManyToManyField(Ingredient, through='IngredientAmount', related_name='recipes', )
+
+    def __str__(self):
+        return self.name[:20]
 
 
 class IngredientAmount(models.Model):
@@ -74,4 +83,23 @@ class Favorite(models.Model):
                                blank=True,
                                verbose_name='Рецепт',
                                related_name='favorites',
+                               )
+
+
+class Cart(models.Model):
+    """Модель для корзины рецептов."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=True,
+        verbose_name='Пользователь',
+        related_name='cart'
+    )
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               null=True,
+                               blank=True,
+                               verbose_name='Рецепт',
+                               related_name='cart',
                                )

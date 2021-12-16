@@ -3,8 +3,9 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
-from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite
-from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, FavoriteSerializer
+from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
+from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, \
+    FavoriteSerializer, CartSerializer
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import RecipePagination
 
@@ -43,6 +44,10 @@ class RecipeViewSet(ModelViewSet):
             favorite_recipes_ids = Favorite.objects.filter(author=author).values('recipe_id')
 
             return queryset.filter(author=author, pk__in=favorite_recipes_ids)
+
+        if self.request.GET.get('is_in_shopping_cart'):
+            cart_recipes_ids = Cart.objects.filter(author=author).values('recipe_id')
+            return queryset.filter(author=author, pk__in=cart_recipes_ids)
         return queryset
 
     @action(detail=True, methods=['GET'])
@@ -67,3 +72,24 @@ class RecipeViewSet(ModelViewSet):
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=['GET'])
+    def shopping_cart(self, request, pk):
+
+        author = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        payload = {
+            'author': author.id,
+            'recipe': recipe.id
+        }
+        serializer = CartSerializer(data=payload)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @shopping_cart.mapping.delete
+    def delete_item_from_shopping_cart(self, request, pk):
+        author = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        cart = get_object_or_404(Cart, author=author, recipe=recipe)
+        cart.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
