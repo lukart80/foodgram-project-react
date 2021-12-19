@@ -1,8 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
 from djoser.views import TokenCreateView, TokenDestroyView
 from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, SubscriptionsListView
+from .views import SubscriptionsListView, UserViewSet
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='users')
