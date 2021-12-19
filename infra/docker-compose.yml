@@ -3,6 +3,7 @@ version: '3.3'
 volumes:
   media_value:
   static_value:
+  postgres_data:
 
 services:
 
@@ -33,3 +34,12 @@ services:
     volumes:
       - media_value:/code/media/
       - static_value:/code/static/
+    depends_on:
+      - db
+
+  db:
+    image: postgres:12.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env

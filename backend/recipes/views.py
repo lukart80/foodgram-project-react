@@ -1,13 +1,16 @@
+from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
+from rest_framework import permissions
 from .models import Ingredient, Tag, Recipe, Favorite, Cart
 from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, \
-    FavoriteSerializer, CartSerializer
+    FavoriteSerializer, CartSerializer, RecipeWithoutIngredientsSerializer
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import CustomPagination
+from .permissions import IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -27,6 +30,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -50,7 +54,7 @@ class RecipeViewSet(ModelViewSet):
             return queryset.filter(author=author, pk__in=cart_recipes_ids)
         return queryset
 
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['GET'], permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk):
 
         author = self.request.user
@@ -60,9 +64,13 @@ class RecipeViewSet(ModelViewSet):
             'recipe': recipe.id
         }
         serializer = FavoriteSerializer(data=payload)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(RecipeWithoutIngredientsSerializer(
+            recipe, context=self.get_serializer_context()).data,
+            status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
@@ -72,7 +80,7 @@ class RecipeViewSet(ModelViewSet):
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['GET'], permission_classes=[permissions.IsAuthenticated])
     def shopping_cart(self, request, pk):
 
         author = self.request.user
@@ -82,9 +90,13 @@ class RecipeViewSet(ModelViewSet):
             'recipe': recipe.id
         }
         serializer = CartSerializer(data=payload)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(RecipeWithoutIngredientsSerializer(
+            recipe, context=self.get_serializer_context()
+        ).data, status=status.HTTP_201_CREATED)
 
     @shopping_cart.mapping.delete
     def delete_item_from_shopping_cart(self, request, pk):
@@ -94,7 +106,7 @@ class RecipeViewSet(ModelViewSet):
         cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         author = self.request.user
         cart_recipes = author.cart.all()
@@ -109,5 +121,7 @@ class RecipeViewSet(ModelViewSet):
                 ingredient_data['amount'] += ingredient.amount
         shopping_list = []
         for ingredient, data in shopping_list_dict.items():
-            shopping_list.append(f'{ingredient} - {data["amount"]} {data["measurement_unit"]}')
-        return Response("\n".join(shopping_list), content_type='text/txt')
+            shopping_list.append(f'{ingredient} - {data["amount"]} {data["measurement_unit"]} ')
+        response = Response(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping-list.txt"'
+        return response

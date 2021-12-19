@@ -89,8 +89,12 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
     objects = UserManager()
 
+    def __str__(self):
+        return self.username
+
 
 class Follower(models.Model):
+    """Модель для подписок."""
     follower = models.ForeignKey(
         User,
         related_name='follower',

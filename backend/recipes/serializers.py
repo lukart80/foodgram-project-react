@@ -1,12 +1,10 @@
-
-
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
-from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
+from rest_framework.validators import UniqueTogetherValidator
 
-from users.models import User, Follower
+from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
 
 from users.serializers import UserSerializer
 
@@ -87,6 +85,19 @@ class IngredientAmountWriteSerializer(serializers.Serializer):
     id = serializers.IntegerField(write_only=True)
 
 
+class RecipeWithoutIngredientsSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения рецепта без ингредиентов."""
+
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def get_image(self, obj):
+        return obj.image.url
+
+
 class RecipeWriteSerializer(ModelSerializer):
     """Сериализатор для создания рецепта."""
     image = Base64ImageField(required=True)
@@ -138,6 +149,9 @@ class RecipeWriteSerializer(ModelSerializer):
 
         return instance
 
+    def to_representation(self, instance):
+        return RecipeReadSerializer(instance, context=self.context).data
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления избранных рецептов."""
@@ -145,6 +159,13 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('author', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('author', 'recipe'),
+                message='Такой рецепт уже есть в избранном'
+            )
+        ]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -153,9 +174,10 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ('author', 'recipe')
-
-
-
-
-
-
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Cart.objects.all(),
+                fields=('author', 'recipe'),
+                message='Такой рецепт уже добавлен в корзину'
+            )
+        ]

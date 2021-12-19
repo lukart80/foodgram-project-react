@@ -32,7 +32,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
     def to_representation(self, instance):
-        return UserSerializer(instance, context=self.context).data
+        data = {
+            'email': instance.email,
+            'id': instance.id,
+            'username': instance.username,
+            'first_name': instance.first_name,
+            'last_name': instance.last_name
+        }
+        return data
 
 
 class RecipeWithoutIngredientsSerializer(serializers.ModelSerializer):
@@ -77,7 +84,8 @@ class FollowingCreateSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Follower.objects.all(),
-                fields=('follower', 'following')
+                fields=('follower', 'following'),
+                message='Подписка уже существует'
             )
         ]
 

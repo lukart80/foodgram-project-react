@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework import permissions
 from .models import User, Follower
 from .serializers import UserSerializer, FollowingReadSerializer, UserCreateSerializer, FollowingCreateSerializer
 from recipes.pagination import CustomPagination
@@ -11,7 +12,6 @@ from recipes.pagination import CustomPagination
 class UserViewSet(ModelViewSet):
     """View-set для работы с пользователями."""
     queryset = User.objects.all()
-
     pagination_class = CustomPagination
 
     def get_serializer_class(self):
@@ -20,11 +20,11 @@ class UserViewSet(ModelViewSet):
         if self.action == 'create':
             return UserCreateSerializer
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)
 
-    @action(methods=['GET'], detail=True)
+    @action(methods=['GET'], detail=True, permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, pk):
         follower = request.user
         following = get_object_or_404(User, pk=pk)
@@ -51,9 +51,9 @@ class SubscriptionsListView(ListAPIView):
     """View-класс для просмотра подписчиков."""
     serializer_class = FollowingReadSerializer
     pagination_class = CustomPagination
+    permission_classes = [permissions.IsAuthenticated, ]
 
     def get_queryset(self):
         user = self.request.user
         user_following_ids = user.follower.all().values('following')
         return User.objects.filter(pk__in=user_following_ids)
-

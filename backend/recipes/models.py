@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models import constraints
 
 User = get_user_model()
 
@@ -90,7 +89,7 @@ class Favorite(models.Model):
                                verbose_name='Рецепт',
                                related_name='favorites',
                                )
-    
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['author', 'recipe'], name='unique_favorite')
