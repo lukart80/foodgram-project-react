@@ -1,12 +1,14 @@
+from rest_framework import permissions, status
+from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework import status
-from rest_framework import permissions
-from .models import User, Follower
-from .serializers import UserSerializer, FollowingReadSerializer, UserCreateSerializer, FollowingCreateSerializer
+
 from recipes.pagination import CustomPagination
+
+from .models import Follower, User
+from .serializers import (FollowingCreateSerializer, FollowingReadSerializer,
+                          UserCreateSerializer, UserSerializer)
 
 
 class UserViewSet(ModelViewSet):

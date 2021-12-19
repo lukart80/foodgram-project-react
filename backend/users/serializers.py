@@ -2,8 +2,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import User, Follower
 from recipes.models import Recipe
+
+from .models import Follower, User
 
 
 class UserSerializer(serializers.ModelSerializer):

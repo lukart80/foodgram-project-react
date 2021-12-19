@@ -1,6 +1,9 @@
 import django_filters
-from .models import Ingredient, Recipe
+
 from users.models import User
+
+from .models import Ingredient, Recipe
+
 
 class IngredientFilter(django_filters.FilterSet):
     """Фильтр для ингредиентов."""
