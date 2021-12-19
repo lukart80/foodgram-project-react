@@ -28,9 +28,29 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, password):
-        return self.create_user(
-            email, username, password, first_name='Admin', last_name='Admin', is_superuser=True, is_staff=True)
+    def create_superuser(self, email, username, password, first_name, last_name):
+        if not email:
+            raise ValueError('Введите адрес электронной почты')
+        if not password:
+            raise ValueError('Введите пароль')
+        if not username:
+            raise ValueError('Введите username')
+        if not first_name:
+            raise ValueError('Введите имя')
+        if not last_name:
+            raise ValueError('Введите фамилию')
+
+        user = self.model(
+            email=email,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            is_superuser=True,
+            is_staff=True,
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
 
 class User(AbstractUser):

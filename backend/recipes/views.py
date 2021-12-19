@@ -3,13 +3,11 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
-from rest_framework.generics import ListAPIView
-from users.models import User
 from .models import Ingredient, Tag, Recipe, Favorite, Cart
 from .serializers import IngredientSerializer, TagSerializer, RecipeReadSerializer, RecipeWriteSerializer, \
-    FavoriteSerializer, CartSerializer, FollowingReadSerializer
+    FavoriteSerializer, CartSerializer
 from .filters import IngredientFilter, RecipeFilter
-from .pagination import RecipePagination
+from .pagination import CustomPagination
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -28,7 +26,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
-    pagination_class = RecipePagination
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -96,12 +94,20 @@ class RecipeViewSet(ModelViewSet):
         cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(methods=['GET'], detail=False)
+    def download_shopping_cart(self, request):
+        author = self.request.user
+        cart_recipes = author.cart.all()
 
-class SubscriptionsListView(ListAPIView):
-    serializer_class = FollowingReadSerializer
-    pagination_class = RecipePagination
-
-    def get_queryset(self):
-        user = self.request.user
-        user_following_ids = user.follower.all().values('following')
-        return User.objects.filter(pk__in=user_following_ids)
+        shopping_list_dict = dict()
+        for recipe in cart_recipes:
+            ingredients_amount = recipe.recipe.recipe_amount.all()
+            for ingredient in ingredients_amount:
+                ingredient_data = shopping_list_dict.setdefault(
+                    ingredient.ingredient.name, {'amount': 0,
+                                                 'measurement_unit': ingredient.ingredient.measurement_unit})
+                ingredient_data['amount'] += ingredient.amount
+        shopping_list = []
+        for ingredient, data in shopping_list_dict.items():
+            shopping_list.append(f'{ingredient} - {data["amount"]} {data["measurement_unit"]}')
+        return Response("\n".join(shopping_list), content_type='text/txt')

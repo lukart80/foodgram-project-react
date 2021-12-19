@@ -1,12 +1,14 @@
-from abc import ABC
+
 
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
 from .models import Ingredient, Tag, Recipe, IngredientAmount, Favorite, Cart
-from users.serializers import UserSerializer
+
 from users.models import User, Follower
+
+from users.serializers import UserSerializer
 
 
 class IngredientSerializer(ModelSerializer):
@@ -97,7 +99,7 @@ class RecipeWriteSerializer(ModelSerializer):
         fields = ('name', 'image', 'tags', 'text', 'cooking_time', 'ingredients')
 
     def create(self, validated_data):
-        ingredients = self.validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredients')
         tags = self.initial_data.get('tags')
         recipe = Recipe.objects.create(**validated_data)
         for tag_id in tags:
@@ -109,6 +111,7 @@ class RecipeWriteSerializer(ModelSerializer):
                 ingredient=ingredient_instance,
                 amount=ingredient.get('amount')
             )
+
         return recipe
 
     def update(self, instance, validated_data, partial=True):
@@ -152,34 +155,7 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ('author', 'recipe')
 
 
-class FollowerRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения рецепта в подписках."""
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowingReadSerializer(serializers.ModelSerializer):
-    """Сериализатор для вывода авторов, на которых подписан пользователь."""
-    is_subscribed = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'username', 'recipes', 'is_subscribed', 'recipes_count')
 
-    def get_is_subscribed(self, obj):
-        return Follower.objects.filter(follower=self.context['request'].user, following=obj).exists()
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        recipes = obj.recipes.all()
-        if request.GET.get('recipes_limit'):
-            recipes = recipes[:int(request.GET.get('recipes_limit'))]
-        serializer = FollowerRecipeSerializer(recipes, many=True)
-        return serializer.data
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.all().count()
