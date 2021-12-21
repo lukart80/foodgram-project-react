@@ -56,8 +56,18 @@ class RecipeReadSerializer(ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'author', 'name', 'image', 'text', 'id', 'ingredients', 'cooking_time', 'is_favorited',
-                  'is_in_shopping_cart')
+        fields = (
+            'tags',
+            'author',
+            'name',
+            'image',
+            'text',
+            'id',
+            'ingredients',
+            'cooking_time',
+            'is_favorited',
+            'is_in_shopping_cart'
+        )
         read_only_fields = ['tags', 'author', 'name', 'image', 'text', 'id', 'ingredients', 'cooking_time']
 
     def get_image(self, obj):

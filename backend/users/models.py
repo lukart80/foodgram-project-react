@@ -59,7 +59,6 @@ class User(AbstractUser):
         unique=True,
         max_length=254,
         blank=False,
-        null=False,
         verbose_name='email'
     )
 
@@ -68,21 +67,18 @@ class User(AbstractUser):
         unique=True,
         max_length=150,
         blank=False,
-        null=False
     )
 
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=150,
         blank=False,
-        null=False,
     )
 
     last_name = models.CharField(
         verbose_name='Фамилия',
         max_length=150,
         blank=False,
-        null=False,
     )
 
     USERNAME_FIELD = 'email'

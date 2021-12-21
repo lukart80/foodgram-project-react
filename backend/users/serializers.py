@@ -25,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания пользователя."""
+
     class Meta:
         model = User
         fields = ('email', 'username', 'first_name', 'last_name', 'password')
@@ -94,5 +95,3 @@ class FollowingCreateSerializer(serializers.ModelSerializer):
         if self.context.get('request').user.pk == value:
             raise ValidationError('Подписка на самого себя!')
         return value
-
-

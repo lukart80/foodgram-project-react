@@ -42,10 +42,15 @@ class Recipe(models.Model):
         null=False,
         on_delete=models.CASCADE,
         related_name='recipes')
-    name = models.CharField(max_length=200, verbose_name='Название', blank=False, null=False)
+    name = models.CharField(max_length=200, verbose_name='Название', blank=False)
     image = models.ImageField(upload_to='recipes/', blank=False, null=False)
-    text = models.CharField(max_length=3000, verbose_name='Описание', blank=False, null=False)
-    cooking_time = models.PositiveIntegerField(verbose_name='Время пригототовления', blank=False, null=False)
+    text = models.CharField(max_length=3000, verbose_name='Описание', blank=False)
+    cooking_time = models.PositiveIntegerField(
+        verbose_name='Время пригототовления',
+        blank=False,
+        null=False,
+        error_messages= {'coocking_time': 'неверное время приготовления'}
+    )
     ingredients = models.ManyToManyField(Ingredient, through='IngredientAmount', related_name='recipes', )
 
     def __str__(self):
