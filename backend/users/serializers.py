@@ -99,8 +99,8 @@ class FollowingCreateSerializer(serializers.ModelSerializer):
 
 class ResetPasswordSerializer(serializers.Serializer):
     """Сериализатор для изменения пароля."""
-    new_password = serializers.CharField(required=True, read_only=True)
-    current_password = serializers.CharField(required=True, read_only=True)
+    new_password = serializers.CharField(required=True)
+    current_password = serializers.CharField(required=True)
 
     def validate_current_password(self, value):
         user = self.context.get('request').user

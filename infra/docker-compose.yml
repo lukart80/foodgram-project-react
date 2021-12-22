@@ -27,7 +27,7 @@ services:
 
 
   backend:
-    image: lukart80/foodgram_backend
+    image: lukart80/foodgram_backend:master
     volumes:
       - media_value:/code/media/
       - static_value:/code/static/
