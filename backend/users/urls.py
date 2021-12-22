@@ -15,4 +15,5 @@ urlpatterns = [
     path('api/auth/token/logout/', TokenDestroyView.as_view(), name='logout'),
 
 
+
 ]
