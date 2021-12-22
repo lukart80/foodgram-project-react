@@ -48,7 +48,7 @@ class UserViewSet(ModelViewSet):
         Follower.objects.get(following=following, follower=follower).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['POST'], detail=True, permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['POST'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def set_password(self, request):
         user = request.user
         serializer = ResetPasswordSerializer(data=request.data, context=self.get_serializer_context())
