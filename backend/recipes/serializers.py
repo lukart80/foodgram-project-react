@@ -95,16 +95,6 @@ class IngredientAmountWriteSerializer(serializers.Serializer):
     amount = serializers.IntegerField(write_only=True)
     id = serializers.IntegerField(write_only=True)
 
-    def validate_amount(self, value):
-        if value <= 0:
-            raise ValidationError('Отрицательное или нулевое количество ингредиента')
-        return value
-
-    def validate_id(self, value):
-        if not Ingredient.objects.filter(id=value).exists():
-            raise ValidationError('ингредиента с таким Id нет')
-        return value
-
 
 class RecipeWithoutIngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения рецепта без ингредиентов."""
@@ -176,11 +166,17 @@ class RecipeWriteSerializer(ModelSerializer):
     def validate(self, attrs):
         ingredients = attrs['ingredients']
         ingredients_id = [ingredient.get('id') for ingredient in ingredients]
-
+        ingredients_amount = [ingredient.get('amount') for ingredient in ingredients]
         if len(ingredients_id) > len(set(ingredients_id)):
             raise ValidationError('Два раза один и тот же ингредиент')
+        for ingredient_amount in ingredients_amount:
+            if ingredient_amount <= 0:
+                raise ValidationError('Отрицательное или нулевое количество ингредиентов')
         return attrs
 
+    def validate_cooking_time(self, value):
+        if value <= 0:
+            raise ValidationError('Отрицательное или нулевое время приготовления')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
