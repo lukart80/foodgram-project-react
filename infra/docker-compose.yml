@@ -8,9 +8,7 @@ volumes:
 services:
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: lukart80/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
@@ -28,9 +26,7 @@ services:
       - backend
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: lukart80/foodgram_backend
     volumes:
       - media_value:/code/media/
       - static_value:/code/static/

@@ -48,11 +48,11 @@ class RecipeViewSet(ModelViewSet):
         if self.request.GET.get('is_favorited'):
             favorite_recipes_ids = Favorite.objects.filter(author=author).values('recipe_id')
 
-            return queryset.filter(author=author, pk__in=favorite_recipes_ids)
+            return queryset.filter(pk__in=favorite_recipes_ids)
 
         if self.request.GET.get('is_in_shopping_cart'):
             cart_recipes_ids = Cart.objects.filter(author=author).values('recipe_id')
-            return queryset.filter(author=author, pk__in=cart_recipes_ids)
+            return queryset.filter(pk__in=cart_recipes_ids)
         return queryset
 
     @action(detail=True, methods=['GET'], permission_classes=[permissions.IsAuthenticated])
