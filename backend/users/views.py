@@ -54,7 +54,8 @@ class UserViewSet(ModelViewSet):
         serializer = ResetPasswordSerializer(data=request.data, context=self.get_serializer_context())
         if serializer.is_valid():
             user.set_password(request.data['new_password'])
-            return Response(status=status.HTTP_205_RESET_CONTENT)
+            user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
