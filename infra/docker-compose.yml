@@ -25,6 +25,7 @@ services:
     depends_on:
       - backend
 
+
   backend:
     image: lukart80/foodgram_backend
     volumes:
