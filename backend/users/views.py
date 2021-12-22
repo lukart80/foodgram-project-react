@@ -8,7 +8,7 @@ from recipes.pagination import CustomPagination
 
 from .models import Follower, User
 from .serializers import (FollowingCreateSerializer, FollowingReadSerializer,
-                          UserCreateSerializer, UserSerializer)
+                          UserCreateSerializer, UserSerializer, ResetPasswordSerializer)
 
 
 class UserViewSet(ModelViewSet):
@@ -47,6 +47,15 @@ class UserViewSet(ModelViewSet):
         following = get_object_or_404(User, pk=pk)
         Follower.objects.get(following=following, follower=follower).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['POST'], detail=True, permission_classes=[permissions.IsAuthenticated])
+    def set_password(self, request):
+        user = request.user
+        serializer = ResetPasswordSerializer(data=request.data, context=self.get_serializer_context())
+        if serializer.is_valid():
+            user.set_password(request.data['new_password'])
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscriptionsListView(ListAPIView):

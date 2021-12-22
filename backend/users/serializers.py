@@ -95,3 +95,16 @@ class FollowingCreateSerializer(serializers.ModelSerializer):
         if self.context.get('request').user.pk == value:
             raise ValidationError('Подписка на самого себя!')
         return value
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """Сериализатор для изменения пароля."""
+    new_password = serializers.CharField(required=True, read_only=True)
+    current_password = serializers.CharField(required=True, read_only=True)
+
+    def validate_current_password(self, value):
+        user = self.context.get('request').user
+        if user.check_password(value):
+            return value
+        raise ValidationError('Неверный пароль пользователя!')
+
