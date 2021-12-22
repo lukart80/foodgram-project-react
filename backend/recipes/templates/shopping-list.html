@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    <h1>Ваш список покупок</h1>
+    <table style="border: solid">
+        <thead>
+            <th>ингредиент</th>
+            <th>количество</th>
+            <th>единицы измерения</th>
+        </thead>
+        {% for ingredient, data in shopping_list_dict.items %}
+        <tr>
+            <td>{{ ingredient }}</td>
+            <td>{{ data.amount }}</td>
+
+            <td>{{ data.measurement_unit }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</body>
+</html>

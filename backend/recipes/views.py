@@ -1,8 +1,12 @@
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+import weasyprint
 
 from .filters import IngredientFilter, RecipeFilter
 from .models import Cart, Favorite, Ingredient, Recipe, Tag
@@ -71,7 +75,7 @@ class RecipeViewSet(ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(RecipeWithoutIngredientsSerializer(
             recipe, context=self.get_serializer_context()).data,
-            status=status.HTTP_201_CREATED)
+                        status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
@@ -120,9 +124,10 @@ class RecipeViewSet(ModelViewSet):
                     ingredient.ingredient.name, {'amount': 0,
                                                  'measurement_unit': ingredient.ingredient.measurement_unit})
                 ingredient_data['amount'] += ingredient.amount
-        shopping_list = []
-        for ingredient, data in shopping_list_dict.items():
-            shopping_list.append(f'{ingredient} - {data["amount"]} {data["measurement_unit"]} ')
-        response = Response(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shopping-list.txt"'
+
+        html = render_to_string('shopping-list.html', {'shopping_list_dict': shopping_list_dict})
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=shopping-list.pdf'
+        weasyprint.HTML(string=html).write_pdf(response)
         return response
+
