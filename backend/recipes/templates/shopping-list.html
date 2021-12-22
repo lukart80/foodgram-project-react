@@ -3,18 +3,17 @@
 
 <body>
     <h1>Ваш список покупок</h1>
-    <table style="border: solid">
+    <table style="border: solid; border-collapse: collapse">
         <thead>
-            <th>ингредиент</th>
-            <th>количество</th>
-            <th>единицы измерения</th>
+            <th style="border: solid; border-collapse: collapse">ингредиент</th>
+            <th style="border: solid; border-collapse: collapse">количество</th>
+            <th style="border: solid; border-collapse: collapse">е.и.</th>
         </thead>
         {% for ingredient, data in shopping_list_dict.items %}
-        <tr>
-            <td>{{ ingredient }}</td>
-            <td>{{ data.amount }}</td>
-
-            <td>{{ data.measurement_unit }}</td>
+        <tr style="border: solid">
+            <td style="border: solid">{{ ingredient }}</td>
+            <td style="border: solid">{{ data.amount }}</td>
+            <td style="border: solid">{{ data.measurement_unit }}</td>
         </tr>
         {% endfor %}
 

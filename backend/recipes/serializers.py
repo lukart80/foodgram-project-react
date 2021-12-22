@@ -1,5 +1,6 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueTogetherValidator
@@ -94,6 +95,16 @@ class IngredientAmountWriteSerializer(serializers.Serializer):
     amount = serializers.IntegerField(write_only=True)
     id = serializers.IntegerField(write_only=True)
 
+    def validate_amount(self, value):
+        if value <= 0:
+            raise ValidationError('Отрицательное или нулевое количество ингредиента')
+        return value
+
+    def validate_id(self, value):
+        if not Ingredient.objects.filter(id=value).exists():
+            raise ValidationError('ингредиента с таким Id нет')
+        return value
+
 
 class RecipeWithoutIngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения рецепта без ингредиентов."""
@@ -161,6 +172,15 @@ class RecipeWriteSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
+
+    def validate(self, attrs):
+        ingredients = attrs['ingredients']
+        ingredients_id = [ingredient.get('id') for ingredient in ingredients]
+
+        if len(ingredients_id) > len(set(ingredients_id)):
+            raise ValidationError('Два раза один и тот же ингредиент')
+        return attrs
+
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
