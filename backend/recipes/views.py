@@ -35,7 +35,13 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve' or self.action == 'create':
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        else:
+            permission_classes = [IsAuthorOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -130,4 +136,3 @@ class RecipeViewSet(ModelViewSet):
         response['Content-Disposition'] = 'attachment; filename=shopping-list.pdf'
         weasyprint.HTML(string=html).write_pdf(response)
         return response
-
