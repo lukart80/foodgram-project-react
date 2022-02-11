@@ -12,8 +12,8 @@
         {% for ingredient in shopping_list %}
         <tr style="border: solid">
             <td style="border: solid">{{ ingredient.ingredients__name }}</td>
-            <td style="border: solid">{{ data.amount.ingredients__measurement_unit }}</td>
-            <td style="border: solid">{{ data.measurement_unit.total_quantity }}</td>
+            <td style="border: solid">{{ ingredient.ingredients__measurement_unit }}</td>
+            <td style="border: solid">{{ ingredient.amount }}</td>
         </tr>
         {% endfor %}
 
