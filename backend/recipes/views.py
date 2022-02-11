@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from rest_framework import permissions, status
@@ -120,18 +121,18 @@ class RecipeViewSet(ModelViewSet):
     @action(methods=['GET'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         author = self.request.user
-        cart_recipes = author.cart.all()
 
-        shopping_list_dict = dict()
-        for recipe in cart_recipes:
-            ingredients_amount = recipe.recipe.recipe_amount.all()
-            for ingredient in ingredients_amount:
-                ingredient_data = shopping_list_dict.setdefault(
-                    ingredient.ingredient.name, {'amount': 0,
-                                                 'measurement_unit': ingredient.ingredient.measurement_unit})
-                ingredient_data['amount'] += ingredient.amount
+        shopping_list = Recipe.objects.filter(cart__author=author).values('ingredients__name', 'ingredients__measurement_unit').annotate(amount=Sum('recipe_amount__amount'))
+        # shopping_list_dict = dict()
+        # for recipe in cart_recipes:
+        #     ingredients_amount = recipe.recipe.recipe_amount.all()
+        #     for ingredient in ingredients_amount:
+        #         ingredient_data = shopping_list_dict.setdefault(
+        #             ingredient.ingredient.name, {'amount': 0,
+        #                                          'measurement_unit': ingredient.ingredient.measurement_unit})
+        #         ingredient_data['amount'] += ingredient.amount
 
-        html = render_to_string('shopping-list.html', {'shopping_list_dict': shopping_list_dict})
+        html = render_to_string('shopping-list.html', {'shopping_list_dict': shopping_list})
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=shopping-list.pdf'
         weasyprint.HTML(string=html).write_pdf(response)
