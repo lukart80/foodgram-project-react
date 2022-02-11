@@ -132,7 +132,7 @@ class RecipeViewSet(ModelViewSet):
         #                                          'measurement_unit': ingredient.ingredient.measurement_unit})
         #         ingredient_data['amount'] += ingredient.amount
 
-        html = render_to_string('shopping-list.html', {'shopping_list_dict': shopping_list})
+        html = render_to_string('shopping-list.html', {'shopping_list': shopping_list})
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=shopping-list.pdf'
         weasyprint.HTML(string=html).write_pdf(response)
